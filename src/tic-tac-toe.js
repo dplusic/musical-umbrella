@@ -1,4 +1,5 @@
 import Game from 'boardgame.io/game';
+import {size} from './constants';
 
 /**
  * @return {boolean}
@@ -31,18 +32,39 @@ function IsVictory(cells) {
 }
 
 const TicTacToe = Game({
-    setup: () => ({cells: new Array(9).fill(null)}),
+    setup: numPlayers => {
+        const cells = new Array(size.width).fill(null).map(x => new Array(size.height).fill(null));
+        const playerPositions = {};
+        const scores = {};
+
+        for (let currentPlayer = 0; currentPlayer < numPlayers; currentPlayer++) {
+            while (true) {
+                const i = Math.floor((Math.random() * size.width));
+                const j = Math.floor((Math.random() * size.height));
+                if (cells[i][j] === null) {
+                    cells[i][j] = '' + currentPlayer;
+                    playerPositions[currentPlayer] = {i, j};
+                    scores[currentPlayer] = 1;
+                    break;
+                }
+            }
+        }
+        return {cells, playerPositions, scores};
+    },
 
     moves: {
-        clickCell(G, ctx, id) {
+        clickCell(G, ctx, i, j) {
             const cells = [...G.cells];
 
             // Ensure we can't overwrite cells.
-            if (cells[id] === null) {
-                cells[id] = ctx.currentPlayer;
+            if (cells[i][j] === null) {
+                cells[i][j] = ctx.currentPlayer;
             }
 
-            return Object.assign({}, G, {cells});
+            const playerPositions = Object.assign({}, G.playerPositions, {[ctx.currentPlayer]: {i, j}});
+            const scores = Object.assign({}, G.scores, {[ctx.currentPlayer]: G.scores[ctx.currentPlayer] + 1});
+
+            return {cells, playerPositions, scores, started: true};
         }
     },
 
