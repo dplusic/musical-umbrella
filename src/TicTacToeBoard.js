@@ -20,9 +20,26 @@ class TicTacToeBoard extends React.Component {
         }
     }
 
+    checkCell(i, j) {
+        if (i < 0 || i >= size.width || j < 0 || j >= size.height) {
+            return false;
+        }
+
+        return this.props.G.cells[i][j] === null;
+    }
+
     componentDidUpdate() {
         if (this.props.isActive !== true || this.props.G.started !== true) {
             return;
+        }
+
+        const playerPosition = this.props.G.playerPositions[this.props.ctx.currentPlayer];
+        if (this.checkCell(playerPosition.i - 1, playerPosition.j) === false &&
+            this.checkCell(playerPosition.i + 1, playerPosition.j) === false &&
+            this.checkCell(playerPosition.i, playerPosition.j - 1) === false &&
+            this.checkCell(playerPosition.i, playerPosition.j + 1) === false) {
+            this.props.moves.die();
+            this.props.endTurn();
         }
 
         this.timer = setTimeout(() => {
@@ -44,7 +61,7 @@ class TicTacToeBoard extends React.Component {
     render() {
         let winner = '';
         if (this.props.ctx.winner !== null) {
-            winner = <div>Winner: {this.props.ctx.winner}</div>;
+            winner = <div>Winner: {playerNames[this.props.ctx.winner]}</div>;
         }
 
         const cellStyle = {

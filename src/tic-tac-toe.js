@@ -1,41 +1,12 @@
 import Game from 'boardgame.io/game';
-import {size} from './constants';
-
-/**
- * @return {boolean}
- */
-function IsVictory(cells) {
-    const positions = [
-        [0, 1, 2],
-        [3, 4, 5],
-        [6, 7, 8],
-        [0, 3, 6],
-        [1, 4, 7],
-        [2, 5, 8],
-        [0, 4, 8],
-        [2, 4, 6],
-    ];
-
-    for (let pos of positions) {
-        const symbol = cells[pos[0]];
-        let winner = symbol;
-        for (let i of pos) {
-            if (cells[i] !== symbol) {
-                winner = null;
-                break;
-            }
-        }
-        if (winner !== null) return true;
-    }
-
-    return false;
-}
+import {size, numPlayers} from './constants';
 
 const TicTacToe = Game({
     setup: numPlayers => {
         const cells = new Array(size.width).fill(null).map(x => new Array(size.height).fill(null));
         const playerPositions = {};
         const scores = {};
+        const dead = {};
 
         for (let currentPlayer = 0; currentPlayer < numPlayers; currentPlayer++) {
             while (true) {
@@ -45,11 +16,12 @@ const TicTacToe = Game({
                     cells[i][j] = '' + currentPlayer;
                     playerPositions[currentPlayer] = {i, j};
                     scores[currentPlayer] = 1;
+                    dead[currentPlayer] = false;
                     break;
                 }
             }
         }
-        return {cells, playerPositions, scores};
+        return {cells, playerPositions, scores, dead};
     },
 
     moves: {
@@ -63,13 +35,27 @@ const TicTacToe = Game({
 
             const playerPositions = Object.assign({}, G.playerPositions, {[ctx.currentPlayer]: {i, j}});
             const scores = Object.assign({}, G.scores, {[ctx.currentPlayer]: G.scores[ctx.currentPlayer] + 1});
+            const dead = Object.assign({}, G.dead);
 
-            return {cells, playerPositions, scores, started: true};
-        }
+            return {cells, playerPositions, scores, dead, started: true};
+        },
+
+        die(G, ctx) {
+            const playerPositions = Object.assign({}, G.playerPositions, {[ctx.currentPlayer]: {i: -1, j: -1}});
+            const dead = Object.assign({}, G.dead, {[ctx.currentPlayer]: true});
+            return Object.assign({}, G, {playerPositions, dead});
+        },
     },
 
     victory: (G, ctx) => {
-        return IsVictory(G.cells) ? ctx.currentPlayer : null;
+        if (Object.values(G.dead).every(x => x) === false) {
+            return null;
+        }
+
+        return Object.entries(G.scores)
+            .sort(([aKey, aValue], [bKey, bValue]) => bValue - aValue)
+            .map(([key, value]) => key)
+            .find(x => true);
     }
 });
 
