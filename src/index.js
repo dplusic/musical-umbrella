@@ -4,5 +4,13 @@ import './index.css';
 import App from './App';
 import registerServiceWorker from './registerServiceWorker';
 
-ReactDOM.render(<App />, document.getElementById('root'));
+const params = window.location.search.substring(1)
+    .split('&')
+    .map(x => x.split('='))
+    .reduce((acc, cur) => {
+        acc[cur[0]] = cur[1];
+        return acc;
+    }, {});
+
+ReactDOM.render(<App gameID={params.gameID} playerID={params.playerID}/>, document.getElementById('root'));
 registerServiceWorker();
