@@ -11,6 +11,7 @@
 * 모두가 확장시킬 수 없는 시점에서의 획득 칸이 가장 많은 플레이어가 승리
 
 ## 스크린샷
+![screenshot](https://raw.githubusercontent.com/dplusic/musical-umbrella/5b338d3066c0780509441910824379f02da4a018/README_res/screenshot.png)
 
 ## [boardgame.io](https://boardgame.io) 사용기
 * 약 한달 된 프로젝트임
